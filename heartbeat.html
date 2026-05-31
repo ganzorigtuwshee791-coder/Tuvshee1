@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Зүрхний цохилт</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital@0;1&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --blood: #8b0000;
+      --blood-bright: #cc0000;
+      --blood-glow: #ff2222;
+      --pulse: #ff4444;
+      --dark: #000000;
+      --dark-mid: #0a0000;
+    }
+
+    body {
+      background: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: 'Crimson Pro', Georgia, serif;
+    }
+
+    /* Ambient dark red vignette */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, #1a000088 0%, #000000ff 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .scene {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+      z-index: 1;
+    }
+
+    /* ── Heart SVG container ── */
+    .heart-wrap {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Outer glow ring */
+    .glow-ring {
+      position: absolute;
+      inset: -30px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, #ff000022 0%, transparent 70%);
+      animation: glowPulse 0.857s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%   { transform: scale(0.9); opacity: 0.3; }
+      15%  { transform: scale(1.15); opacity: 0.9; }
+      30%  { transform: scale(1.0); opacity: 0.5; }
+      45%  { transform: scale(1.12); opacity: 0.8; }
+      65%  { transform: scale(0.95); opacity: 0.2; }
+      100% { transform: scale(0.9); opacity: 0.3; }
+    }
+
+    .heart-svg {
+      width: 220px;
+      height: 220px;
+      filter: drop-shadow(0 0 18px #cc000088) drop-shadow(0 0 40px #88000044);
+      animation: heartBeat 0.857s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes heartBeat {
+      0%   { transform: scale(1);    filter: drop-shadow(0 0 10px #cc000066) drop-shadow(0 0 30px #88000033); }
+      14%  { transform: scale(1.18); filter: drop-shadow(0 0 30px #ff0000cc) drop-shadow(0 0 60px #cc000088); }
+      28%  { transform: scale(1.05); filter: drop-shadow(0 0 16px #cc000088) drop-shadow(0 0 40px #88000055); }
+      42%  { transform: scale(1.14); filter: drop-shadow(0 0 26px #ff000099) drop-shadow(0 0 55px #cc000077); }
+      60%  { transform: scale(0.97); filter: drop-shadow(0 0 8px #aa000055)  drop-shadow(0 0 20px #66000033); }
+      100% { transform: scale(1);    filter: drop-shadow(0 0 10px #cc000066) drop-shadow(0 0 30px #88000033); }
+    }
+
+    /* ── ECG / pulse line ── */
+    .ecg-wrap {
+      width: 340px;
+      height: 70px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ecg-wrap svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .ecg-line {
+      fill: none;
+      stroke: var(--blood-glow);
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 4px #ff4444);
+    }
+
+    /* Animate the dash offset to create a "drawing" travel effect */
+    .ecg-line {
+      stroke-dasharray: 700;
+      stroke-dashoffset: 700;
+      animation: ecgDraw 0.857s linear infinite;
+    }
+
+    @keyframes ecgDraw {
+      0%   { stroke-dashoffset: 700; opacity: 1; }
+      85%  { stroke-dashoffset: 0;   opacity: 1; }
+      100% { stroke-dashoffset: 0;   opacity: 0; }
+    }
+
+    /* Fade-out trail mask */
+    .ecg-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, var(--dark) 0%, transparent 30%, transparent 70%, var(--dark) 100%);
+      pointer-events: none;
+    }
+
+    /* ── Text ── */
+    .label {
+      text-align: center;
+      color: #aa3333;
+      letter-spacing: 0.25em;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      font-style: italic;
+      animation: labelFade 0.857s ease-in-out infinite;
+      user-select: none;
+    }
+
+    @keyframes labelFade {
+      0%, 100% { opacity: 0.5; }
+      20%       { opacity: 1;   color: #ff6666; }
+      50%       { opacity: 0.6; }
+    }
+
+    .bpm {
+      font-size: 3.2rem;
+      color: #cc1111;
+      font-style: normal;
+      letter-spacing: 0.05em;
+      text-shadow: 0 0 20px #ff222266, 0 0 60px #88000033;
+      animation: bpmPulse 0.857s ease-in-out infinite;
+      line-height: 1;
+    }
+
+    .bpm span {
+      font-size: 1rem;
+      vertical-align: middle;
+      margin-left: 4px;
+      opacity: 0.6;
+      letter-spacing: 0.15em;
+    }
+
+    @keyframes bpmPulse {
+      0%, 100% { text-shadow: 0 0 20px #ff222266, 0 0 60px #88000033; }
+      15%       { text-shadow: 0 0 40px #ff2222cc, 0 0 80px #cc000066; }
+      45%       { text-shadow: 0 0 30px #ff2222aa, 0 0 70px #aa000055; }
+    }
+
+    /* Floating blood particles */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #cc0000;
+      opacity: 0;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      0%   { transform: translateY(0) scale(1);   opacity: 0; }
+      10%  { opacity: 0.6; }
+      90%  { opacity: 0.2; }
+      100% { transform: translateY(-100vh) scale(0.3); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating particles -->
+  <div class="particles" id="particles"></div>
+
+  <div class="scene">
+
+    <div class="heart-wrap">
+      <div class="glow-ring"></div>
+
+      <!-- Realistic anatomical-style heart SVG -->
+      <svg class="heart-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="heartGrad" cx="45%" cy="35%" r="65%">
+            <stop offset="0%"   stop-color="#ff3333"/>
+            <stop offset="35%"  stop-color="#cc0000"/>
+            <stop offset="70%"  stop-color="#880000"/>
+            <stop offset="100%" stop-color="#3a0000"/>
+          </radialGradient>
+          <radialGradient id="ventricleGrad" cx="50%" cy="40%" r="60%">
+            <stop offset="0%"   stop-color="#dd1111"/>
+            <stop offset="100%" stop-color="#660000"/>
+          </radialGradient>
+          <filter id="blur">
+            <feGaussianBlur stdDeviation="1.5"/>
+          </filter>
+        </defs>
+
+        <!-- Shadow blob -->
+        <ellipse cx="100" cy="175" rx="55" ry="10" fill="#33000033" filter="url(#blur)"/>
+
+        <!-- Main heart body -->
+        <path d="
+          M100,165
+          C 60,140 20,115 18,80
+          C 16,50 35,28 58,28
+          C 72,28 85,36 95,48
+          C 97,44 100,40 100,38
+          C 100,40 103,44 105,48
+          C 115,36 128,28 142,28
+          C 165,28 184,50 182,80
+          C 180,115 140,140 100,165
+          Z
+        " fill="url(#heartGrad)"/>
+
+        <!-- Left ventricle highlight -->
+        <path d="
+          M100,155
+          C 72,135 45,115 42,85
+          C 40,65 52,48 65,46
+          C 78,44 90,54 97,66
+          L100,155 Z
+        " fill="url(#ventricleGrad)" opacity="0.6"/>
+
+        <!-- Aorta -->
+        <path d="M100,38 C100,30 105,18 115,12 C122,7 130,8 132,15 C134,22 128,28 120,32"
+              fill="none" stroke="#cc0000" stroke-width="10" stroke-linecap="round"/>
+        <path d="M100,38 C100,30 105,18 115,12 C122,7 130,8 132,15 C134,22 128,28 120,32"
+              fill="none" stroke="#ff4444" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+
+        <!-- Pulmonary artery -->
+        <path d="M93,36 C90,26 84,16 76,12 C70,8 63,10 62,17 C61,24 68,30 76,34"
+              fill="none" stroke="#aa0000" stroke-width="8" stroke-linecap="round"/>
+
+        <!-- Vena cava top -->
+        <path d="M105,50 C110,38 115,30 115,22" fill="none" stroke="#660000" stroke-width="7" stroke-linecap="round"/>
+
+        <!-- Surface highlight -->
+        <path d="M70,55 C68,70 72,88 80,100" fill="none" stroke="#ff666633" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- Shine -->
+        <ellipse cx="72" cy="62" rx="14" ry="20" fill="white" opacity="0.07" transform="rotate(-20,72,62)"/>
+      </svg>
+    </div>
+
+    <!-- ECG line -->
+    <div class="ecg-wrap">
+      <svg viewBox="0 0 340 70" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- ECG path: flat → P wave → flat → QRS complex → T wave → flat -->
+        <polyline class="ecg-line" points="
+          0,35
+          40,35
+          50,32
+          60,35
+          70,35
+          78,35
+          82,10
+          86,60
+          90,35
+          95,22
+          105,35
+          115,35
+          160,35
+          170,32
+          180,35
+          190,35
+          198,35
+          202,10
+          206,60
+          210,35
+          215,22
+          225,35
+          235,35
+          280,35
+          290,32
+          300,35
+          310,35
+          318,35
+          322,10
+          326,60
+          330,35
+          335,22
+          340,35
+        "/>
+      </svg>
+    </div>
+
+    <div>
+      <div class="bpm">70 <span>BPM</span></div>
+      <div class="label" style="margin-top:10px;">Зүрхний цохилт • Heartbeat</div>
+    </div>
+
+  </div>
+
+  <script>
+    // Generate floating particles
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 28; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.bottom = '-10px';
+      p.style.width  = (Math.random() * 3 + 1.5) + 'px';
+      p.style.height = p.style.width;
+      p.style.animationDuration  = (Math.random() * 12 + 8) + 's';
+      p.style.animationDelay     = (Math.random() * 10) + 's';
+      p.style.opacity = 0;
+      container.appendChild(p);
+    }
+  </script>
+
+</body>
+</html>
